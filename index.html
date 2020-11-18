@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Vega-Lite Bar Chart</title>
+    <meta charset="utf-8" />
+
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.17.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@4.17.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.12.2"></script>
+
+    <style media="screen">
+      /* Add space between Vega-Embed links  */
+      .vega-actions a {
+        margin-right: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>From The <a href="https://covidtracking.com/">COVID Tracking Project</a></h2>
+    <!-- Container for the visualization -->
+    <div id="vis"></div>
+
+    <script>
+      // Assign the specification to a local variable vlSpec.
+      var vlSpec = {
+        $schema: "https://vega.github.io/schema/vega-lite/v4.json",
+        data: {"url": "https://api.covidtracking.com/v1/states/current.csv"},
+        vconcat: [
+            //scatter plot
+            {
+                title: {
+                    text: "COVID-19 Cases v.s. Death (Categorized by Data Completeness)",
+                    anchor: "middle"
+                },
+                width: 700,
+                selection: {
+                    brush:{"type":"interval"}
+                },
+                mark: "point",
+                encoding: {
+                        x: {"field": "positive", "type": "quantitative"},
+                        y: {"field": "death", "type": "quantitative"},
+                        color: {"field": "dataQualityGrade", "type": "nominal"},
+                        tooltip: {"field": "state", "type": "nominal"}
+                }
+            },
+            //bar charts
+            {
+                title: {
+                    text: "COVID-19 Hospitalized / Recovered Cases by State (Filterable by Brushing Scatter Plot)",
+                    anchor: "middle"
+                },
+                transform: [{
+                    filter:{"selection":"brush"}
+                }],
+                repeat: ["hospitalizedCumulative", "recovered"],
+                columns: 1,
+                spec:{
+                    width: 700,
+                    height: 110,
+                    mark: "bar",
+                    encoding: {
+                        x: {"field": "state", "type": "nominal"},
+                        y:{
+                            "field": {"repeat":"repeat"},
+                            "type":"quantitative"
+                        }
+                    }
+                }
+            }
+        ]
+      };
+
+      // Embed the visualization in the container with id `vis`
+      vegaEmbed('#vis', vlSpec);
+    </script>
+  </body>
+</html>
